@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Laptop Decision Helper (for Utkarsha's Needs)</title>
+  <style>
+    :root{
+      --bg: #f5f8fb;
+      --card: #ffffff;
+      --muted: #5b6b7a;
+      --accent-blue: 74,144,226;  /* used in rgba */
+      --accent-green: 34,197,94;
+      --accent-orange: 249,115,22;
+      --accent-magenta: 168,85,247;
+      --radius: 14px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background:var(--bg);
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:28px;
+      color:#12202b;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:640px;
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:26px;
+      box-shadow: 0 8px 28px rgba(21,32,43,0.08);
+      border: 1px solid rgba(15,23,42,0.03);
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    h1{
+      font-size:28px;
+      margin:0;
+      letter-spacing: -0.2px;
+    }
+    .subtitle{
+      color:var(--muted);
+      font-size:14px;
+      margin-top:6px;
+    }
+
+    /* field styles */
+    .fields{ margin-top:18px; display:grid; gap:14px; }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    label{
+      font-size:18px;
+      font-weight:600;
+      color:#123;
+    }
+
+    select, input[type="text"]{
+      font-size:18px;
+      padding:14px 14px;
+      border-radius:10px;
+      border:1px solid rgba(15,23,42,0.06);
+      background: #fff;
+      outline:none;
+      box-shadow: 0 10px 20px rgba(2,6,23,0.03);
+    }
+
+    /* colored left strip + soft glow per field (subtle) */
+    .field .control{
+      position:relative;
+      display:block;
+    }
+    .field .control::before{
+      content:"";
+      position:absolute;
+      left:-8px; top:0; bottom:0;
+      width:6px;
+      border-radius:8px;
+      background:transparent;
+      box-shadow: none;
+    }
+
+    /* accent colors per field using data-accent */
+    .field[data-accent="blue"] .control::before{
+      background: linear-gradient(180deg, rgba(var(--accent-blue),1), rgba(var(--accent-blue),0.7));
+      box-shadow: 0 10px 30px rgba(var(--accent-blue),0.06);
+    }
+    .field[data-accent="purple"] .control::before{
+      background: linear-gradient(180deg, rgba(145, 94, 255, 1), rgba(145,94,255,0.7));
+      box-shadow: 0 10px 30px rgba(145,94,255,0.06);
+    }
+    .field[data-accent="teal"] .control::before{
+      background: linear-gradient(180deg, rgba(20,184,166,1), rgba(20,184,166,0.7));
+      box-shadow: 0 10px 30px rgba(20,184,166,0.06);
+    }
+    .field[data-accent="orange"] .control::before{
+      background: linear-gradient(180deg, rgba(var(--accent-orange),1), rgba(var(--accent-orange),0.8));
+      box-shadow: 0 10px 30px rgba(var(--accent-orange),0.06);
+    }
+    .field[data-accent="magenta"] .control::before{
+      background: linear-gradient(180deg, rgba(var(--accent-magenta),1), rgba(var(--accent-magenta),0.8));
+      box-shadow: 0 10px 30px rgba(var(--accent-magenta),0.06);
+    }
+    .field[data-accent="green"] .control::before{
+      background: linear-gradient(180deg, rgba(var(--accent-green),1), rgba(var(--accent-green),0.8));
+      box-shadow: 0 10px 30px rgba(var(--accent-green),0.06);
+    }
+
+    /* help button */
+    .help-row{ display:flex; gap:10px; align-items:center; }
+    .help-btn{
+      border:1px solid rgba(15,23,42,0.06);
+      background:#fff;
+      padding:8px 12px;
+      border-radius:10px;
+      font-size:15px;
+      cursor:pointer;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.03);
+    }
+    .help-btn:hover{ transform:translateY(-1px); }
+
+    /* big action area */
+    .actions{
+      display:flex;
+      gap:12px;
+      margin-top:18px;
+      align-items:center;
+    }
+    .btn-check{
+      flex:1;
+      font-size:20px;
+      padding:14px 18px;
+      border-radius:12px;
+      background: linear-gradient(180deg, rgba(var(--accent-blue),1), rgba(var(--accent-blue),0.9));
+      color:white; border:0; cursor:pointer;
+      box-shadow: 0 10px 30px rgba(var(--accent-blue),0.12);
+    }
+    .btn-check:active{ transform:translateY(1px); }
+
+    /* result block */
+    .result{
+      margin-top:18px;
+      padding:18px;
+      border-radius:12px;
+      font-size:20px;
+      font-weight:700;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+      min-height:76px;
+    }
+    .result.perfect{
+      background: rgba(250, 204, 21, 0.15); /* gold/yellow */
+      color: #a16207;
+      box-shadow: 0 12px 30px rgba(250, 204, 21, 0.1);
+    }
+    .result.buy{
+      background: rgba(34,197,94,0.12);
+      color: #065f46;
+      box-shadow: 0 12px 30px rgba(34,197,94,0.08);
+    }
+    .result.consider{
+      background: rgba(249, 115, 22, 0.1); /* orange */
+      color: #9a3412;
+      box-shadow: 0 12px 30px rgba(249, 115, 22, 0.07);
+    }
+    .result.nobuy{
+      background: rgba(239,68,68,0.08);
+      color: #7f1d1d;
+      box-shadow: 0 12px 30px rgba(239,68,68,0.06);
+    }
+
+    .score-row{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; color:#0b1220; font-weight:700; }
+    .score-num{ font-size:28px; }
+
+    /* breakdown list */
+    .breakdown{
+      width:100%;
+      margin-top:10px;
+      border-radius:10px;
+      background: linear-gradient(180deg, rgba(250,250,250,1), rgba(245,247,250,1));
+      padding:12px;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.03);
+      color:#0b1220;
+      font-size:16px;
+    }
+    .breakdown li{ margin:6px 0; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+
+    /* popup help */
+    .overlay{ position:fixed; inset:0; display:none; background:rgba(3,7,18,0.42); justify-content:center; align-items:center; z-index:40; padding:18px;}
+    .overlay .modal{
+      width:100%; max-width:560px;
+      background:#fff; border-radius:12px; padding:24px; color:#0b1220;
+      box-shadow: 0 18px 50px rgba(2,6,23,0.2);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .overlay h3{ margin-top:0; font-size:20px; }
+    .overlay h4{ font-size: 16px; margin-bottom: 8px; margin-top: 18px; color: #1e293b; }
+    .overlay p{ font-size:15px; color:#334155; line-height:1.5; margin-top:0; }
+    .overlay ul { padding-left: 20px; margin-top: 8px; color:#334155;}
+    .overlay li { margin-bottom: 8px; font-size:15px;}
+    .overlay .close{ margin-top:12px; padding:10px 14px; border-radius:10px; background:#f3f4f6; border:0; cursor:pointer; }
+
+    /* ---- Responsive Design ---- */
+    @media (max-width: 680px) {
+        body {
+            padding: 18px; /* Reduce body padding on tablets and below */
+        }
+    }
+
+    @media (max-width: 520px){
+      .card{ padding: 18px; }
+      h1{ font-size: 24px; }
+      label{ font-size: 16px; }
+      select, input[type="text"]{ font-size: 16px; padding: 12px; }
+      .btn-check{ font-size: 18px; padding: 12px; }
+      .score-num{ font-size: 24px; }
+      .fields { gap: 12px; }
+    }
+
+    @media (max-width: 420px) {
+        header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        .help-row {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr; /* Stack buttons */
+            gap: 8px;
+        }
+        .result .score-row {
+            flex-direction: column;
+            gap: 4px;
+        }
+        .overlay .modal {
+            padding: 18px; /* Tighter padding on small screen modals */
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="main" aria-label="Laptop decision helper">
+      <header>
+        <div>
+          <h1>Laptop Decision Helper</h1>
+          <div class="subtitle">(for Utkarsha's Needs)</div>
+        </div>
+
+        <div class="help-row">
+          <button class="help-btn" id="whyOpen">⚙️ Why Heavy Specs?</button>
+          <button class="help-btn" id="helpOpen">ℹ️ What to Look For</button>
+        </div>
+      </header>
+
+      <div class="fields" id="fields">
+
+        <div class="field" data-accent="blue">
+          <label for="proc">Processor (as on spec sheet)</label>
+          <div class="control">
+            <select id="proc" aria-label="Processor">
+              <option value="">-- Select processor --</option>
+              <optgroup label="Intel - High Performance (HX-series)">
+                <option value="i9-14-hx">Core i9-14900HX</option>
+                <option value="i9-13-hx">Core i9-13900HX</option>
+                <option value="i7-14-hx">Core i7-14700HX</option>
+                <option value="i7-13-hx">Core i7-13700HX</option>
+              </optgroup>
+              <optgroup label="Intel - Performance (H-series & Ultra)">
+                <option value="ultra9">Core Ultra 9</option>
+                <option value="ultra7">Core Ultra 7</option>
+                <option value="i7-13-h">Core i7-13650H</option>
+              </optgroup>
+               <optgroup label="AMD - High Performance (HX-series)">
+                 <option value="ryzen9-hx">Ryzen 9 7945HX</option>
+               </optgroup>
+              <optgroup label="AMD - Performance (HS-series)">
+                <option value="ryzen9-hs">Ryzen 9 8945HS</option>
+                <option value="ryzen-8845hs">Ryzen 7 8845HS</option>
+                <option value="ryzen-7840hs">Ryzen 7 7840HS</option>
+              </optgroup>
+              <optgroup label="Not Recommended (Weaker Multi-Core)">
+                  <option value="i5-14-h">Core i5-14500H</option>
+                  <option value="i5-13-h">Core i5-13500H</option>
+                  <option value="ultra5">Core Ultra 5</option>
+                  <option value="core7-u">Intel Core 7 (U-series)</option>
+                  <option value="core5-u">Intel Core 5 (U-series)</option>
+                  <option value="ryzen5-hs">Ryzen 5 8645HS</option>
+                  <option value="i7-13-p">Intel P-series (e.g. i7-1360P)</option>
+                  <option value="ryzen7-u">AMD U-series (e.g. Ryzen 7 7730U)</option>
+                  <option value="other">Other / Weaker CPU</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" data-accent="purple">
+          <label for="gpu">Graphics Card (GPU)</label>
+          <div class="control">
+            <select id="gpu" aria-label="GPU">
+              <option value="">-- Select GPU --</option>
+              <option value="rtx5060">NVIDIA RTX 5060</option>
+              <option value="rtx5050">NVIDIA RTX 5050</option>
+              <option value="rtx4060">NVIDIA RTX 4060</option>
+              <option value="rtx4050">NVIDIA RTX 4050 (Avoid)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" data-accent="teal">
+          <label for="res">Display — Resolution (exact spec)</label>
+          <div class="control">
+            <select id="res" aria-label="Resolution">
+              <option value="">-- Select resolution --</option>
+              <option value="3840x2160">3840 × 2160 — 4K UHD</option>
+              <option value="2880x1800">2880 × 1800 — 2.8K / QHD+</option>
+              <option value="2560x1600">2560 × 1600 — WQXGA / QHD+</option>
+              <option value="2560x1440">2560 × 1440 — QHD</option>
+              <option value="1920x1200">1920 × 1200 — WUXGA / FHD+</option>
+              <option value="1920x1080">1920 × 1080 — Full HD</option>
+              <option value="1366x768">1366 × 768 — HD (avoid)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" data-accent="orange">
+          <label for="bright">Display — Brightness (nits)</label>
+          <div class="control">
+            <select id="bright" aria-label="Brightness">
+              <option value="">-- Select brightness --</option>
+              <option value="500">500 nits or more (Excellent)</option>
+              <option value="400">400 nits</option>
+              <option value="350">350 nits</option>
+              <option value="300">300 nits</option>
+              <option value="250">Below 300 nits (dim — avoid)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" data-accent="magenta">
+          <label for="color">Display — Color Gamut (spec sheet)</label>
+          <div class="control">
+            <select id="color" aria-label="Color gamut">
+              <option value="">-- Select color gamut --</option>
+              <option value="100-dcip3">100% DCI-P3 (Best)</option>
+              <option value="100-adobergb">100% Adobe RGB (Excellent)</option>
+              <option value="100-srgb">100% sRGB (Great)</option>
+              <option value="72-ntsc">72% NTSC (Good)</option>
+              <option value="45-ntsc">45% NTSC / ~65% sRGB (Poor — avoid)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" data-accent="green">
+          <label for="battery">Battery (Watt-hours as on spec)</label>
+          <div class="control">
+            <select id="battery" aria-label="Battery">
+              <option value="">-- Select battery capacity --</option>
+              <option value="95">90 Wh or more</option>
+              <option value="85">80 - 89 Wh</option>
+              <option value="75">70 - 79 Wh</option>
+              <option value="65">60 - 69 Wh</option>
+              <option value="55">50 - 59 Wh</option>
+              <option value="45">Less than 50 Wh (avoid)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" data-accent="blue">
+          <label for="name">Laptop name / model (type here)</label>
+          <div class="control">
+            <input id="name" type="text" placeholder="e.g., Lenovo Legion 5 Pro" aria-label="Laptop name">
+          </div>
+        </div>
+
+      </div> <div class="actions">
+        <button class="btn-check" id="checkBtn">Check Laptop</button>
+      </div>
+
+      <div id="resultWrap" style="display:none;">
+        <div id="resultBox" class="result" role="status" aria-live="polite">
+          </div>
+
+        <ul id="breakdown" class="breakdown" aria-label="Score breakdown" style="display:none;">
+          </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="helpOverlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <h3>Minimum Requirements (Budget: ~₹1 - 1.1 Lakh)</h3>
+      <p><strong>Processor:</strong> Must be a high-performance series CPU. Look for names containing <strong>Intel Core i7, Core Ultra 7, AMD Ryzen 7, or Ryzen AI 7</strong>. Avoid i5/Ryzen 5 and low-power U/P-series CPUs.</p>
+      <p><strong>GPU (Graphics Card):</strong> A minimum of <strong>NVIDIA RTX 4060 (8GB)</strong> is essential. An RTX 5050 (8GB) or 5060 is also acceptable. <strong>The RTX 4050 (6GB) is not an option.</strong></p>
+      <p><strong>Display:</strong></p>
+      <ul>
+        <li><strong>Resolution:</strong> Minimum <strong>1920x1080 (Full HD)</strong>. Higher is better.</li>
+        <li><strong>Brightness:</strong> Minimum <strong>300 nits</strong> to ensure usability in different lighting conditions.</li>
+        <li><strong>Color Gamut:</strong> Strictly <strong>100% sRGB</strong> or better. This is crucial for accurate color in PCB designs and 3D models.</li>
+      </ul>
+      <p><strong>Battery:</strong> Minimum <strong>60Wh</strong>. A larger battery (<strong>70Wh to 90Wh</strong>) is highly preferred for long hours during hackathons.</p>
+      <p><strong>Brands:</strong> While brand doesn't dictate performance, <strong>HP, Lenovo, and Acer</strong> are noted to have good service availability in the local area.</p>
+      <div style="text-align:right;">
+        <button class="close" id="closeHelp">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="whyOverlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <h3>Justification for High-Performance Specifications</h3>
+      <p>A high-performance laptop is essential for my specialized work in IoT, AI model training, and competitive events. The specific requirements are driven by the demanding software and use cases outlined below:</p>
+      
+      <h4>1. AI and Computer Vision Projects</h4>
+      <p>My primary focus is on training <strong>Convolutional Neural Network (CNN)</strong> models for computer vision, which are integral to my IoT projects. This involves running Large Language Models (LLMs) like LLaMA directly on the device. This is a VRAM-intensive task:</p>
+      <ul>
+        <li><strong>Why 8GB VRAM is necessary:</strong> An 8GB GPU (like the RTX 4060/5050) is the absolute minimum for running and fine-tuning modern LLMs.</li>
+        <li><strong>Why RTX 4050 is unsuitable:</strong> The RTX 4050 has only 6GB of VRAM. This is insufficient, as even 8GB is a tight constraint for these models. A 6GB card would not be able to handle the projects I need to work on.</li>
+      </ul>
+
+      <h4>2. Hardware Design and 3D Modeling</h4>
+      <p>I am actively involved in hardware projects that require designing complex PCBs and 3D models. The software for these tasks is resource-heavy and demands:</p>
+      <ul>
+        <li><strong>A powerful processor and GPU</strong> to handle complex schematics and render 3D designs without lag.</li>
+        <li><strong>A color-accurate display (100% sRGB minimum)</strong> to prevent washed-out colors. This is critical for distinguishing between component layers and ensuring design accuracy.</li>
+      </ul>
+
+      <h4>3. Competitive Internal Hackathons/Ideathons and Events</h4>
+      <p>I plan to participate in prestigious events like the Smart India Hackathon (SIH) and Google Summer of Code (GSoC). Success in these time-sensitive competitions requires:</p>
+      <ul>
+        <li><strong>Portability and Visibility:</strong> A bright screen with at least <strong>300 nits</strong> is necessary for working in various environments, including well-lit or outdoor areas.</li>
+        <li><strong>Sustained Performance:</strong> A large battery is crucial for working through long coding sessions without being dependent on a power outlet.</li>
+      </ul>
+
+      <h4>4. Budget Justification</h4>
+      <p>The requested budget of under ₹1 lakh to ₹1.10 lakh is based on market trends from previous years, where laptops equipped with an RTX 4060 were available within this price range. This budget ensures that the machine meets all the critical technical requirements mentioned above.</p>
+      
+      <div style="text-align:right;">
+        <button class="close" id="closeWhy">Close</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    // Scoring maps & rules
+    const procScores = {
+        "i9-14-hx": 45, "i9-13-hx": 42, "ryzen9-hx": 44, "ultra9": 40,
+        "i7-14-hx": 40, "i7-13-hx": 38, "ryzen9-hs": 38, "ultra7": 38,
+        "i7-13-h": 34, "ryzen-8845hs": 36, "ryzen-7840hs": 34,
+        "i5-14-h": -30, "i5-13-h": -35, "ultra5": -30, "ryzen5-hs": -35,
+        "core7-u": -50, "core5-u": -55,
+        "i7-13-p": -40, "ryzen7-u": -60, "other": -80
+    };
+
+    const gpuScores = { "rtx5060": 35, "rtx5050": 30, "rtx4060": 25, "rtx4050": -1000 };
+
+    const resScores = {
+        "3840x2160": 20, "2880x1800": 18, "2560x1600": 16, "2560x1440": 15,
+        "1920x1200": 12, "1920x1080": 10, "1366x768": -60
+    };
+
+    const colorScores = { 
+        "100-dcip3": 20, "100-adobergb": 20, "100-srgb": 15, 
+        "72-ntsc": 12, "45-ntsc": -45 
+    };
+
+    const batteryScores = { "95": 30, "85": 20, "75": 10, "65": 5, "55": -30, "45": -60 };
+
+    function brightnessScore(nits){
+      if (!nits) return 0;
+      if (nits >= 500) return 20;
+      if (nits >= 400) return 15;
+      if (nits >= 350) return 12;
+      if (nits >= 300) return 10;
+      return -40; // less than 300 nits
+    }
+
+    function getSelectVal(id){
+      const el = document.getElementById(id);
+      return el ? el.value : "";
+    }
+    
+    function getRecommendation(score, hasKillerFlaw, negativeComponents) {
+        const finalRemark = `For a final confirmation, it is recommended to discuss this laptop's specifications with Utkarsha to ensure it aligns perfectly with the requirements.`;
+
+        if (hasKillerFlaw || score < 70) {
+            let reason = "";
+            if (negativeComponents.length === 1) {
+                reason = `The primary issue is the <strong>${negativeComponents[0].k.toLowerCase()}</strong>, which doesn't meet the minimum requirements.`;
+            } else if (negativeComponents.length > 1) {
+                const componentNames = negativeComponents.map(c => `<strong>${c.k.toLowerCase()}</strong>`);
+                const allButLast = componentNames.slice(0, -1).join(', ');
+                const last = componentNames.slice(-1)[0];
+                const joinedNames = `${allButLast} and ${last}`;
+                reason = `The main issues are with the ${joinedNames}, which don't meet the minimum requirements.`;
+            }
+            return { title: "❌ Not Recommended", cls: "nobuy", reason: reason, footer: finalRemark };
+        }
+        if (score >= 110) {
+            return { title: "⭐ PERFECT BUY", cls: "perfect", reason: null, footer: finalRemark };
+        }
+        if (score >= 85) {
+            return { title: "✅ Solid Choice", cls: "buy", reason: null, footer: finalRemark };
+        }
+        return { title: "🤔 Good, but Consider", cls: "consider", reason: null, footer: finalRemark };
+    }
+
+    // Modal Handling
+    const helpOverlay = document.getElementById("helpOverlay");
+    document.getElementById("helpOpen").addEventListener("click", () => {
+      helpOverlay.style.display = "flex";
+      helpOverlay.setAttribute("aria-hidden","false");
+    });
+    document.getElementById("closeHelp").addEventListener("click", () => {
+      helpOverlay.style.display = "none";
+      helpOverlay.setAttribute("aria-hidden","true");
+    });
+
+    const whyOverlay = document.getElementById("whyOverlay");
+    document.getElementById("whyOpen").addEventListener("click", () => {
+      whyOverlay.style.display = "flex";
+      whyOverlay.setAttribute("aria-hidden","false");
+    });
+    document.getElementById("closeWhy").addEventListener("click", () => {
+      whyOverlay.style.display = "none";
+      whyOverlay.setAttribute("aria-hidden","true");
+    });
+
+
+    document.getElementById("checkBtn").addEventListener("click", () => {
+      const proc = getSelectVal("proc");
+      const gpu = getSelectVal("gpu");
+      const res = getSelectVal("res");
+      const bright = parseInt(getSelectVal("bright") || 0, 10);
+      const color = getSelectVal("color");
+      const battery = getSelectVal("battery");
+      const name = (document.getElementById("name").value || "This laptop").trim();
+
+      if(!proc || !gpu || !res || !bright || !color || !battery){
+        showResultBox("This Laptop", { title: "Please select all fields", cls: "nobuy", reason: null, footer: "All dropdowns must have a value to calculate the score." }, 0, []);
+        return;
+      }
+
+      // Special override for RTX 4050
+      if (gpu === 'rtx4050') {
+        const rtx4050rec = {
+            title: "❌ NOT RECOMMENDED",
+            cls: "nobuy",
+            reason: "<strong>GPU is an RTX 4050.</strong> This is an automatic failure because a minimum of 8GB VRAM is required.",
+            footer: `For a final confirmation, it is recommended to discuss this laptop's specifications with Utkarsha to ensure it aligns perfectly with the requirements.`
+        };
+        showResultBox(name, rtx4050rec, -1000, [{k: "GPU", v: -1000}]);
+        return;
+      }
+
+      const breakdown = [];
+      const pScore = procScores[proc] ?? -80;
+      breakdown.push({k:"Processor", v:pScore});
+      const gScore = gpuScores[gpu] ?? -60;
+      breakdown.push({k:"GPU", v:gScore});
+      const rScore = resScores[res] ?? -60;
+      breakdown.push({k:"Resolution", v:rScore});
+      const bScore = brightnessScore(bright);
+      breakdown.push({k:"Brightness (nits)", v:bScore});
+      const cScore = colorScores[color] ?? -40;
+      breakdown.push({k:"Color gamut", v:cScore});
+      const batScore = batteryScores[battery] ?? -60;
+      breakdown.push({k:"Battery (Wh)", v:batScore});
+
+      const total = breakdown.reduce((s,item) => s + item.v, 0);
+      let killer = pScore < 0 || rScore <= -60 || bScore <= -40 || cScore <= -30 || batScore <= -60;
+      
+      const negativeComponents = breakdown.filter(item => item.v < 0);
+      negativeComponents.sort((a, b) => a.v - b.v); // Sort to show worst first
+
+      const recommendation = getRecommendation(total, killer, negativeComponents);
+      showResultBox(name, recommendation, total, breakdown);
+    });
+
+    function showResultBox(laptopName, recommendation, totalScore, breakdown){
+      document.getElementById("resultWrap").style.display = "block";
+      const box = document.getElementById("resultBox");
+      box.className = "result " + recommendation.cls;
+
+      const mainTitle = `${laptopName} — ${recommendation.title}`;
+      const reasonHtml = recommendation.reason ? `<div style="font-size: 15px; font-weight: 500; color: rgba(0,0,0,0.65); margin-top: 8px; line-height: 1.4;">${recommendation.reason}</div>` : '';
+
+      box.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:18px; color: rgba(2,6,23,0.7); font-weight:700;">${mainTitle}</div>
+          ${reasonHtml}
+          <div class="score-row" style="margin-top:10px;">
+            <div style="background:transparent; padding:6px 10px; border-radius:8px; font-weight:700;">
+              Final score: <span class="score-num">${totalScore}</span>
+            </div>
+          </div>
+          <div style="font-size:14px; color: rgba(2,6,23,0.6); font-weight:500; margin-top:12px; padding: 0 8px;">
+            ${recommendation.footer}
+          </div>
+        </div>
+      `;
+
+      const ul = document.getElementById("breakdown");
+      if (breakdown.length === 0) {
+        ul.style.display = "none";
+      } else {
+        ul.style.display = "block";
+        ul.innerHTML = "";
+        for(const item of breakdown){
+          const li = document.createElement("li");
+          const sign = item.v >= 0 ? "+" : "";
+          const colorStyle = item.v < 0 ? ' style="color: #d9534f;"' : '';
+          li.innerHTML = `<span>${item.k}</span><strong${colorStyle}>${sign}${item.v}</strong>`;
+          ul.appendChild(li);
+        }
+        if (recommendation.cls === "nobuy"){
+          const note = document.createElement("li");
+          note.style.marginTop = "8px";
+          note.style.opacity = "0.9";
+          note.innerHTML = `<small style="color:#374151;">Tip: A large negative number in red indicates the major weakness. See Help (ℹ️) for minimum requirements.</small>`;
+          ul.appendChild(note);
+        }
+      }
+      box.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+  </script>
+</body>
+</html>
