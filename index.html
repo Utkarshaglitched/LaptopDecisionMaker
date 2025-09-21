@@ -285,34 +285,47 @@
           <div class="control">
             <select id="proc" aria-label="Processor">
               <option value="">-- Select processor --</option>
-              <optgroup label="Intel - High Performance (HX-series)">
-                <option value="i9-14-hx">Core i9-14900HX</option>
-                <option value="i9-13-hx">Core i9-13900HX</option>
-                <option value="i7-14-hx">Core i7-14700HX</option>
-                <option value="i7-13-hx">Core i7-13700HX</option>
+              <optgroup label="Intel - High Performance (Excellent)">
+                <option value="i9-14900hx">Core i9-14900HX</option>
+                <option value="ultra9-185h">Core Ultra 9 185H</option>
+                <option value="i9-13980hx">Core i9-13980HX</option>
+                <option value="i9-13950hx">Core i9-13950HX</option>
+                <option value="i9-13900hx">Core i9-13900HX</option>
+                <option value="i7-14700hx">Core i7-14700HX</option>
+                <option value="ultra7-165h">Core Ultra 7 165H</option>
+                <option value="ultra7-155h">Core Ultra 7 155H</option>
+                <option value="i7-13850hx">Core i7-13850HX</option>
+                <option value="i7-13700hx">Core i7-13700HX</option>
               </optgroup>
-              <optgroup label="Intel - Performance (H-series & Ultra)">
-                <option value="ultra9">Core Ultra 9</option>
-                <option value="ultra7">Core Ultra 7</option>
-                <option value="i7-13-h">Core i7-13650H</option>
+              <optgroup label="AMD - High Performance (Excellent)">
+                <option value="ryzen-ai9-hx-370">Ryzen AI 9 HX 370</option>
+                <option value="ryzen9-7945hx">Ryzen 9 7945HX</option>
+                <option value="ryzen9-8945hs">Ryzen 9 8945HS</option>
+                <option value="ryzen9-7940hs">Ryzen 9 7940HS</option>
+                <option value="ryzen9-7845hx">Ryzen 9 7845HX</option>
+                <option value="ryzen7-8845hs">Ryzen 7 8845HS</option>
+                <option value="ryzen7-7745hx">Ryzen 7 7745HX</option>
+                <option value="ryzen7-7840hs">Ryzen 7 7840HS</option>
               </optgroup>
-               <optgroup label="AMD - High Performance (HX-series)">
-                 <option value="ryzen9-hx">Ryzen 9 7945HX</option>
-               </optgroup>
-              <optgroup label="AMD - Performance (HS-series)">
-                <option value="ryzen9-hs">Ryzen 9 8945HS</option>
-                <option value="ryzen-8845hs">Ryzen 7 8845HS</option>
-                <option value="ryzen-7840hs">Ryzen 7 7840HS</option>
+              <optgroup label="Intel - Good, but Consider HX">
+                <option value="i9-13900h">Core i9-13900H</option>
+                <option value="i7-13700h">Core i7-13700H</option>
+                <option value="i7-13650hx">Core i7-13650HX</option>
+                <option value="i7-13620h">Core i7-13620H</option>
+              </optgroup>
+              <optgroup label="AMD - Good, but Consider HX">
+                <option value="ryzen7-7735hs">Ryzen 7 7735HS</option>
               </optgroup>
               <optgroup label="Not Recommended (Weaker Multi-Core)">
-                  <option value="i5-14-h">Core i5-14500H</option>
-                  <option value="i5-13-h">Core i5-13500H</option>
-                  <option value="ultra5">Core Ultra 5</option>
-                  <option value="core7-u">Intel Core 7 (U-series)</option>
-                  <option value="core5-u">Intel Core 5 (U-series)</option>
-                  <option value="ryzen5-hs">Ryzen 5 8645HS</option>
-                  <option value="i7-13-p">Intel P-series (e.g. i7-1360P)</option>
-                  <option value="ryzen7-u">AMD U-series (e.g. Ryzen 7 7730U)</option>
+                  <option value="i5-14500hx">Core i5-14500HX</option>
+                  <option value="i5-13600hx">Core i5-13600HX</option>
+                  <option value="i5-13500h">Core i5-13500H</option>
+                  <option value="ultra5-135h">Core Ultra 5 135H</option>
+                  <option value="ryzen5-7645hx">Ryzen 5 7645HX</option>
+                  <option value="ryzen5-8645hs">Ryzen 5 8645HS</option>
+                  <option value="ryzen5-7640hs">Ryzen 5 7640HS</option>
+                  <option value="i7-1370p">Intel Core P-series</option>
+                  <option value="ryzen7-7840u">AMD Ryzen U-series</option>
                   <option value="other">Other / Weaker CPU</option>
               </optgroup>
             </select>
@@ -385,8 +398,8 @@
               <option value="85">80 - 89 Wh</option>
               <option value="75">70 - 79 Wh</option>
               <option value="65">60 - 69 Wh</option>
-              <option value="55">50 - 59 Wh</option>
-              <option value="45">Less than 50 Wh (avoid)</option>
+              <option value="55">50 - 59 Wh (Red Flag)</option>
+              <option value="45">Less than 50 Wh (Red Flag)</option>
             </select>
           </div>
         </div>
@@ -471,12 +484,20 @@
   <script>
     // Scoring maps & rules
     const procScores = {
-        "i9-14-hx": 45, "i9-13-hx": 42, "ryzen9-hx": 44, "ultra9": 40,
-        "i7-14-hx": 40, "i7-13-hx": 38, "ryzen9-hs": 38, "ultra7": 38,
-        "i7-13-h": 34, "ryzen-8845hs": 36, "ryzen-7840hs": 34,
-        "i5-14-h": -30, "i5-13-h": -35, "ultra5": -30, "ryzen5-hs": -35,
-        "core7-u": -50, "core5-u": -55,
-        "i7-13-p": -40, "ryzen7-u": -60, "other": -80
+        // Intel - Excellent
+        "i9-14900hx": 48, "ultra9-185h": 46, "i9-13980hx": 45, "i9-13950hx": 44, "i9-13900hx": 43,
+        "i7-14700hx": 42, "ultra7-165h": 40, "ultra7-155h": 39, "i7-13850hx": 38, "i7-13700hx": 37,
+        // AMD - Excellent
+        "ryzen-ai9-hx-370": 47, "ryzen9-7945hx": 45, "ryzen9-8945hs": 42, "ryzen9-7940hs": 41,
+        "ryzen9-7845hx": 40, "ryzen7-8845hs": 38, "ryzen7-7745hx": 37, "ryzen7-7840hs": 36,
+        // Intel - Good, but Consider HX
+        "i9-13900h": 32, "i7-13700h": 30, "i7-13650hx": 28, "i7-13620h": 26,
+        // AMD - Good, but Consider HX
+        "ryzen7-7735hs": 27,
+        // Not Recommended
+        "i5-14500hx": -30, "i5-13600hx": -32, "i5-13500h": -35, "ultra5-135h": -38,
+        "ryzen5-7645hx": -30, "ryzen5-8645hs": -32, "ryzen5-7640hs": -35,
+        "i7-1370p": -40, "ryzen7-7840u": -50, "other": -80
     };
 
     const gpuScores = { "rtx5060": 35, "rtx5050": 30, "rtx4060": 25, "rtx4050": -1000 };
@@ -595,7 +616,7 @@
       breakdown.push({k:"Battery (Wh)", v:batScore});
 
       const total = breakdown.reduce((s,item) => s + item.v, 0);
-      let killer = pScore < 0 || rScore <= -60 || bScore <= -40 || cScore <= -30 || batScore <= -60;
+      let killer = pScore < 0 || rScore <= -60 || bScore <= -40 || cScore <= -30 || batScore < 0;
       
       const negativeComponents = breakdown.filter(item => item.v < 0);
       negativeComponents.sort((a, b) => a.v - b.v); // Sort to show worst first
